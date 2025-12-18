@@ -1,0 +1,156 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; 
+    padding: 10px;
+    background-color: #f4f4f9;
+}
+.container {
+    max-width: 1000px;
+    width: 100%; 
+    margin: auto;
+    background: #fff;
+    padding: 15px; 
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+h2 {
+    text-align: center;
+    font-size: 1.6em;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.input-group, .output-group {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fafafa;
+}
+.output-group {
+    background-color: #e9f7ef; 
+    border-color: #28a745;
+    font-weight: bold;
+}
+.field {
+    flex: 1 1 100%; /* 默认移动端占据一行 */
+    padding: 5px; 
+    box-sizing: border-box;
+}
+@media (min-width: 600px) {
+    .field {
+        flex: 1 1 calc(50% - 10px); /* 平板/小桌面占据半行 */
+    }
+}
+@media (min-width: 900px) {
+    .field {
+        flex: 1 1 calc(25% - 10px); /* 桌面端占据四分之一行 */
+    }
+}
+
+label {
+    display: block;
+    margin-bottom: 3px;
+    color: #555;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+input[type="number"], input[type="text"], select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+input:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* 突出自动填充的 D14, M14_power 和 R14 */
+#D14, #M14_power, #R14_output {
+    background-color: #e0f7fa; 
+    border: 1px dashed #00bcd4;
+    color: #00bcd4;
+    font-weight: bold;
+}
+
+/* R14 手动输入状态 */
+#R14_output[data-manual="true"] {
+    background-color: #ffffe0; /* 浅黄色背景 */
+    border: 1px solid #ffc107; /* 突出边框 */
+    color: #333;
+}
+
+/* 突出配置选择器 */
+#config_selector_group {
+    flex: 1 1 100%; 
+    padding: 5px 10px;
+    border-left: 5px solid #ffc107;
+    background-color: #fffbe6;
+    margin-bottom: 10px;
+    display: none; 
+}
+.header-row {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+/* 结果值的样式 */
+.output-value {
+    padding: 8px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1.1em;
+    min-height: 1.5em; /* 确保高度一致 */
+    display: flex;
+    align-items: center;
+}
+
+/* 计算按钮样式 */
+#calculate_button {
+    display: block;
+    width: 90%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 15px 20px;
+    font-size: 1.2em;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+#calculate_button:hover {
+    background-color: #218838;
+}
+#calculate_button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* R14 标签和复选框的样式 */
+.r14-label-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.r14-manual-checkbox {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #555;
+    white-space: nowrap;
+}
