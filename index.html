@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA机种别毛利试算表</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>MA机种别毛利试算表</h2>
+        
+        <div class="header-row">⚙️ 号机选择与规格</div>
+        <div class="input-group">
+            <div class="field">
+                <label for="A12">号机 (A12)</label>
+                <select id="A12" onchange="lookupMachineData(); updateConfigSelector();">
+                    <script>
+                        // 在 HTML 中动态生成选项，确保立即加载
+                        for(let i = 1; i <= 65; i++) {
+                            document.write('<option value="' + i + '"' + (i === 11 ? ' selected' : '') + '>MA-' + i + '</option>');
+                        }
+                    </script>
+                </select>
+            </div>
+            
+            <div id="config_selector_group">
+                <label for="config_selector">⚙️ 配置选项（MA-7/8/9 可选）</label>
+                <select id="config_selector" onchange="lookupMachineData(true);">
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="D14">头数 (D14) / 个 (自动填充)</label>
+                <input type="number" id="D14" value="20" readonly>
+            </div>
+            <div class="field">
+                <label for="M14_power">号机功率 (M14) / kW (自动填充)</label>
+                <input type="number" id="M14_power" value="166" readonly>
+            </div>
+            <div class="field">
+                <label for="E14">线速 (E14) / m/min</label>
+                <input type="number" id="E14" value="410" step="1">
+            </div>
+        </div>
+
+        <div class="header-row">⚡ 电费与时间参数</div>
+        <div class="input-group">
+             <div class="field">
+                <label for="S14">当前电费单价 (S14) / 元/kWh</label>
+                <input type="number" id="S14" value="0.574" step="0.001">
+            </div>
+            
+            <div class="field">
+                <div class="r14-label-group">
+                    <label for="R14_output">电费率 (R14) / 元/h·头 (计算值)</label>
+                    <div class="r14-manual-checkbox">
+                        <input type="checkbox" id="R14_manual_check" onclick="toggleR14ManualInput()"> 手动
+                    </div>
+                </div>
+                <input type="number" id="R14_output" value="0.00" readonly data-manual="false">
+            </div>
+            
+            <div class="field">
+                <label for="F12">生产日数 (F12) / 天</label>
+                <input type="number" id="F12" value="30" step="1">
+            </div>
+            <div class="field">
+                <label for="P12">ロス率 (P12) / %</label>
+                <input type="number" id="P12" value="0.05" step="0.01">
+            </div>
+        </div>
+        
+        <div class="header-row">📏 产品尺寸及其他成本</div>
+        <div class="input-group">
+            <div class="field">
+                <label for="B14">导体径 (B14) / mm</label>
+                <input type="number" id="B14" value="0.09" step="0.001">
+            </div>
+            <div class="field">
+                <label for="C14">仕上外径 (C14) / mm</label>
+                <input type="number" id="C14" value="0.102" step="0.001">
+            </div>
+             <div class="field">
+                <label for="A14">品种 (A14)</label>
+                <input type="text" id="A14" value="UEW">
+            </div>
+             <div class="field">
+                <label for="N12">ダイス費单价 (N12)</label>
+                <input type="number" id="N12" value="1.6" step="0.01">
+            </div>
+        </div>
+
+        <div class="header-row">🛠 成本与比率参数</div>
+        <div class="input-group">
+            <div class="field">
+                <label for="H12">加工费 (H12) / 元/kg</label>
+                <input type="number" id="H12" value="17.00" step="0.01">
+            </div>
+            <div class="field">
+                <label for="I8">漆单价 (I8) / 元/kg</label>
+                <input type="number" id="I8" value="13.72" step="0.01">
+            </div>
+            <div class="field">
+                <label for="I10">汇率 (I10)</label>
+                <input type="number" id="I10" value="0.047574" step="0.0001">
+            </div>
+            <div class="field">
+                <label for="I12">浓度 (I12) / %</label>
+                <input type="number" id="I12" value="28" step="0.01">
+            </div>
+            <div class="field">
+                <label for="J12">铜加工费 (J12) / 元/kg</label>
+                <input type="number" id="J12" value="1.50" step="0.01">
+            </div>
+            <div class="field">
+                <label for="K6">线轴 (K6)</label>
+                <select id="K6">
+                    <option value="PT15">PT15</option>
+                    <option value="PT10" selected>PT10</option>
+                    <option value="PL8">PL8</option>
+                    <option value="PL4">PL4</option>
+                    <option value="PT4">PT4</option>
+                    <option value="HKV125">HKV125</option>
+                    <option value="HK199">HK199</option>
+                    <option value="OTHER">OTHER</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="M11">目的地 (M11)</label>
+                <select id="M11">
+                    <option value="華東">華東</option>
+                    <option value="華南">華南</option>
+                    <option value="華北" selected>華北</option>
+                    <option value="船">船</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div class="field"></div>
+        </div>
+        
+        <button id="calculate_button" onclick="calculateMargin()">计算并显示结果</button>
+
+
+        <div class="header-row" style="background-color: #28a745;">✅ 试算结果</div>
+        <div class="output-group">
+            <div class="field">
+                <label>生产量 (F14) / kg</label>
+                <div id="F14" class="output-value">0.00</div>
+            </div>
+            <div class="field">
+                <label>06换算 (G14)</label>
+                <div id="G14_output" class="output-value">0.00</div>
+            </div>
+             <div class="field">
+                <label>线轴成本 (K14) / 元</label>
+                <div id="K14_output" class="output-value">0.00</div>
+            </div>
+            <div class="field">
+                <label>包装费 (L14) / 元</label>
+                <div id="L14_output" class="output-value">0.00</div>
+            </div>
+            <div class="field">
+                <label>总成本 (O14) / 元</label>
+                <div id="O14" class="output-value">0.00</div>
+            </div>
+            <div class="field" style="flex: 1 1 250px;">
+                <label style="font-size: 1.1em; color: #007bff;">**粗利 (P14) / 元**</label>
+                <div id="P14" class="output-value" style="color: #007bff; border-color: #007bff;">0.00</div>
+            </div>
+            <div class="field" style="flex: 1 1 250px;">
+                <label style="font-size: 1.1em; color: #d9534f;">**含电费粗利 (Q14) / 元**</label>
+                <div id="Q14" class="output-value" style="color: #d9534f; border-color: #d9534f;">0.00</div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
