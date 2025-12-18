@@ -1,101 +1,435 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>粗利計算ツール - GitHub 版</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>粗利計算ツール</title>
+<style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 10px; 
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 100%; 
+            margin: auto;
+            background: #fff;
+            padding: 15px; 
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            font-size: 1.3em;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .input-group, .output-group {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .output-group {
+            background-color: #e9f7ef; 
+            border-color: #28a745;
+            font-weight: bold;
+        }
+        .field {
+            flex: 1 1 calc(50% - 20px); 
+            padding: 5px; 
+            box-sizing: border-box;
+        }
+        @media (min-width: 768px) {
+            .field {
+                flex: 1 1 calc(25% - 20px); 
+            }
+        }
+        label {
+            display: block;
+            margin-bottom: 3px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.9em;
+        }
+        /* 突出自动填充和联动的字段 */
+        #D14, #M14_power, #R14_output, #I8 {
+            background-color: #e0f7fa; 
+            border: 1px dashed #00bcd4;
+            color: #007c91;
+            font-weight: bold;
+        }
+        #R14_output[data-manual="true"] {
+            background-color: #ffffe0; 
+            border: 1px solid #ffc107; 
+            color: #333;
+        }
+        #config_selector_group {
+            flex: 1 1 100%; 
+            padding: 5px 10px;
+            border-left: 5px solid #ffc107;
+            background-color: #fffbe6;
+            margin-bottom: 10px;
+            display: none; 
+        }
+        .header-row {
+            background-color: #007bff;
+            color: white;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+        }
+        #calculate_button {
+            display: block;
+            width: 80%;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #calculate_button:hover {
+            background-color: #218838;
+        }
+        .r14-label-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .r14-manual-checkbox {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+</style>
 </head>
 <body>
 
 <div class="container">
-    <h2>粗利計算ツール</h2>
+<h2>粗利計算ツール</h2>
 
-    <div class="header-row">号机选择与规格</div>
-    <div class="input-group">
-        <div class="field">
-            <label for="A12">号机 (A12)</label>
-            <select id="A12" onchange="lookupMachineData(); updateConfigSelector();">
-                </select>
-        </div>
-        <div id="config_selector_group">
-            <label for="config_selector">配置选项 (MA-7/8/9)</label>
-            <select id="config_selector" onchange="lookupMachineData(true);"></select>
-        </div>
-        <div class="field">
-            <label for="D14">头数 (D14)</label>
-            <input type="number" id="D14" class="auto-field" readonly>
-        </div>
-        <div class="field">
-            <label for="M14_power">功率 (M14) / kW</label>
-            <input type="number" id="M14_power" class="auto-field" readonly>
-        </div>
-        <div class="field">
-            <label for="E14">线速 (E14) / m/min</label>
-            <input type="number" id="E14" value="410">
-        </div>
+<div class="header-row">号机选择与规格</div>
+<div class="input-group">
+    <div class="field">
+        <label for="A12">号机 (A12)</label>
+        <select id="A12" onchange="lookupMachineData(); updateConfigSelector();">
+            <script>
+                for(let i = 1; i <= 65; i++) {
+                    document.write('<option value="' + i + '"' + (i === 11 ? ' selected' : '') + '>MA-' + i + '</option>');
+                }
+            </script>
+        </select>
     </div>
-
-    <div class="header-row">产品参数与漆料单价</div>
-    <div class="input-group">
-        <div class="field">
-            <label for="B14">导体径 (B14) / mm</label>
-            <input type="number" id="B14" value="0.09" step="0.001">
-        </div>
-        <div class="field">
-            <label for="C14">仕上外径 (C14) / mm</label>
-            <input type="number" id="C14" value="0.102" step="0.001">
-        </div>
-        <div class="field">
-            <label for="I7_select">漆种类选择</label>
-            <select id="I7_select" onchange="updatePaintPrice()">
-                <option value="">-- 选择型号 --</option>
-                <optgroup label="TPU系列">
-                    <option value="28.88">TPU 6222 LKCF</option>
-                    <option value="20.88">TPU 6228LKCF0.5</option>
-                    <option value="50.48">TPU K5-132-30F</option>
-                </optgroup>
-                <optgroup label="APU/Voltatex系列">
-                    <option value="37.82">APU-2826NSL</option>
-                    <option value="16.33">Voltatex 6325(T)</option>
-                </optgroup>
-                <option value="0">其他 (手动输入)</option>
-            </select>
-        </div>
-        <div class="field">
-            <label for="I8">漆单价 (I8)</label>
-            <input type="number" id="I8" class="auto-field" value="13.72">
-        </div>
-        <div class="field">
-            <label for="A14">品种 (A14)</label>
-            <input type="text" id="A14" value="UEW">
-        </div>
+    <div id="config_selector_group">
+        <label for="config_selector">配置选项（MA-7/8/9 可选）</label>
+        <select id="config_selector" onchange="lookupMachineData(true);">
+        </select>
     </div>
-
-    <div class="header-row">其他费用参数</div>
-    <div class="input-group">
-        <div class="field"><label>电费单价 (S14)</label><input type="number" id="S14" value="0.574"></div>
-        <div class="field"><label>加工费 (H12)</label><input type="number" id="H12" value="17.00"></div>
-        <div class="field">
-            <label>线轴 (K6)</label>
-            <select id="K6">
-                <option value="PT10" selected>PT10</option>
-                <option value="PT15">PT15</option>
-            </select>
-        </div>
+    <div class="field">
+        <label for="D14">头数 (D14) / 个 (自动填充)</label>
+        <input type="number" id="D14" value="20" readonly>
     </div>
-
-    <button id="calculate_button" onclick="calculateMargin()">计算并显示结果</button>
-
-    <div class="header-row result-header">计算结果</div>
-    <div class="output-group">
-        <div class="field"><label>生产量 (kg)</label><div id="F14" class="res-box">0.00</div></div>
-        <div class="field"><label>总成本 (元)</label><div id="O14" class="res-box">0.00</div></div>
-        <div class="field important"><label>粗利 (P14)</label><div id="P14" class="res-box highlight-blue">0.00</div></div>
-        <div class="field important"><label>含电费粗利 (Q14)</label><div id="Q14" class="res-box highlight-red">0.00</div></div>
+    <div class="field">
+        <label for="M14_power">号机功率 (M14) / kW (自动填充)</label>
+        <input type="number" id="M14_power" value="166" readonly>
+    </div>
+    <div class="field">
+        <label for="E14">线速 (E14) / m/min</label>
+        <input type="number" id="E14" value="410" step="1">
     </div>
 </div>
 
-<script src="script.js"></script>
+<div class="header-row"> 电费与时间参数</div>
+<div class="input-group">
+    <div class="field">
+        <label for="S14">当前电费单价 (S14) / 元/kWh</label>
+        <input type="number" id="S14" value="0.574" step="0.001">
+    </div>
+    <div class="field">
+        <div class="r14-label-group">
+            <label for="R14_output">电费率 (R14) / 元/h•头</label>
+            <div class="r14-manual-checkbox">
+                <input type="checkbox" id="R14_manual_check" onclick="toggleR14ManualInput()"> 手动
+            </div>
+        </div>
+        <input type="number" id="R14_output" value="0.00" readonly data-manual="false">
+    </div>
+    <div class="field">
+        <label for="F12">生产日数 (F12) / 天</label>
+        <input type="number" id="F12" value="30" step="1">
+    </div>
+    <div class="field">
+        <label for="P12">ロス率 (P12) / %</label>
+        <input type="number" id="P12" value="0.038" step="0.01">
+    </div>
+</div>
+
+<div class="header-row"> 产品尺寸及漆料成本</div>
+<div class="input-group">
+    <div class="field">
+        <label for="B14">导体径 (B14) / mm</label>
+        <input type="number" id="B14" value="0.09" step="0.001">
+    </div>
+    <div class="field">
+        <label for="C14">仕上外径 (C14) / mm</label>
+        <input type="number" id="C14" value="0.102" step="0.001">
+    </div>
+    <div class="field">
+        <label for="I7_select">漆种类 (选择型号)</label>
+        <select id="I7_select" onchange="updatePaintPrice()">
+            <option value="">-- 请选择漆型号 --</option>
+            <option value="28.88">TPU 6222 LKCF</option>
+            <option value="20.88">TPU 6228LKCF0.5</option>
+            <option value="50.48">TPU K5-132-30F</option>
+            <option value="37.82">APU-2826NSL</option>
+            <option value="29.31">APU-2826F</option>
+            <option value="33.87">ATH-710-27HS</option>
+            <option value="32.26">APU-2835F</option>
+            <option value="14.16">1746/30 LS</option>
+            <option value="13.72">1746/30</option>
+            <option value="14.16">1746/30LK2.0</option>
+            <option value="16.33">Voltatex 6325(T)</option>
+            <option value="16.28">Voltatex 6318LK0.1</option>
+            <option value="23.89">volatatex 7222</option>
+            <option value="20.35">LITON 3330H</option>
+            <option value="27.78">FPU AK 28SF</option>
+            <option value="21.77">TPU 230SA-3C-N</option>
+            <option value="21.77">TPU 3026K LK2.0</option>
+            <option value="28.32">FPH 340 LK2.0</option>
+            <option value="19.56">FPU 30LV LK2.0(T)</option>
+            <option value="20.62">TSH 724KF</option>
+            <option value="16.11">FPU 25LV</option>
+            <option value="17.26">1380/30E (T)</option>
+            <option value="16.37">1380/26E (T)</option>
+            <option value="17.96">1380/30E GSP</option>
+            <option value="16.81">1380/22E</option>
+            <option value="18.58">1380/30EL FJ 2.0</option>
+            <option value="0">其他 (手动输入)</option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="I8">漆单价 (I8) / 元/kg</label>
+        <input type="number" id="I8" value="13.72" step="0.01">
+    </div>
+    <div class="field">
+        <label for="A14">品种 (A14)</label>
+        <input type="text" id="A14" value="UEW">
+    </div>
+    <div class="field">
+        <label for="N12">ダイス費单价 (N12)</label>
+        <input type="number" id="N12" value="1.6" step="0.01">
+    </div>
+    <div class="field">
+        <label for="I12">浓度 (I12) / %</label>
+        <input type="number" id="I12" value="28" step="0.01">
+    </div>
+</div>
+
+<div class="header-row">成本与比率参数</div>
+<div class="input-group">
+    <div class="field">
+        <label for="H12">加工费 (H12) / 元/kg</label>
+        <input type="number" id="H12" value="17.00" step="0.01">
+    </div>
+    <div class="field">
+        <label for="I10">汇率 (I10)</label>
+        <input type="number" id="I10" value="1" step="0.0001">
+    </div>
+    <div class="field">
+        <label for="J12">铜加工费 (J12) / 元/kg</label>
+        <input type="number" id="J12" value="1.50" step="0.01">
+    </div>
+    <div class="field">
+        <label for="K6">线轴 (K6)</label>
+        <select id="K6">
+            <option value="PT15">PT15</option>
+            <option value="PT10" selected>PT10</option>
+            <option value="PL8">PL8</option>
+            <option value="PL4">PL4</option>
+            <option value="PT4">PT4</option>
+            <option value="HKV125">HKV125</option>
+            <option value="HK199">HK199</option>
+            <option value="OTHER">OTHER</option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="M11">目的地 (M11)</label>
+        <select id="M11">
+            <option value="華東">華東</option>
+            <option value="華南">華南</option>
+            <option value="華北" selected>華北</option>
+            <option value="船">船</option>
+            <option value="其他">其他</option>
+        </select>
+    </div>
+</div>
+
+<button id="calculate_button" onclick="calculateMargin()">计算并显示结果</button>
+
+
+<div class="header-row" style="background-color: #28a745;">结果</div>
+<div class="output-group">
+    <div class="field"><label>生产量 (F14) / kg</label><div id="F14">0.00</div></div>
+    <div class="field"><label>06换算 (G14)</label><div id="G14_output">0.00</div></div>
+    <div class="field"><label>线轴成本 (K14) / 元</label><div id="K14_output">0.00</div></div>
+    <div class="field"><label>包装费 (L14) / 元</label><div id="L14_output">0.00</div></div>
+    <div class="field"><label>总成本 (O14) / 元</label><div id="O14">0.00</div></div>
+    <div class="field" style="flex: 1 1 250px;">
+        <label style="font-size: 1.1em; color: #007bff;">**粗利 (P14) / 元**</label>
+        <div id="P14" style="color: #007bff;">0.00</div>
+    </div>
+    <div class="field" style="flex: 1 1 250px;">
+        <label style="font-size: 1.1em; color: #d9534f;">**含电费粗利 (Q14) / 元**</label>
+        <div id="Q14" style="color: #d9534f;">0.00</div>
+    </div>
+</div>
+
+</div>
+
+<script>
+    const machineConfig = [
+        [16, 111], [20, 166], [20, 166], [16, 94], [20, 49], [12, 104], [16, 99], [16, 101], [16, 99], [20, 64], 
+        [20, 64], [16, 199], [32, 101], [32, 101], [20, 64], [20, 68], [20, 68], [20, 68], [20, 63], [20, 63], 
+        [16, 100], [12, 90], [12, 75], [20, 61], [12, 99], [12, 93], [12, 93], [12, 99], [12, 93], [12, 99], 
+        [12, 99], [12, 99], [20, 68], [16, 61], [12, 61], [12, 84], [16, 110], [20, 74], [12, 80], [12, 80], 
+        [18, 51], [18, 51], [20, 105], [20, 105], [16, 104], [20, 62], [16, 84], [16, 99], [20, 76], [16, 104], 
+        [16, 87], [16, 87], [20, 76], [16, 206], [16, 157], [20, 225], [20, 225], [0, 0], [16, 74], [12, 77], 
+        [12, 79], [12, 77], [16, 206], [16, 228], [18, 207]
+    ];
+
+    const alternativeConfigs = { 7: [20, 55], 8: [20, 51], 9: [24, 63] };
+
+    function getInputValue(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+    // 下拉框选择后自动更新 I8 价格和 A14 品种名
+    function updatePaintPrice() {
+        const select = document.getElementById('I7_select');
+        const priceInput = document.getElementById('I8');
+        const nameInput = document.getElementById('A14');
+        const selectedValue = select.value;
+
+        if (selectedValue !== "" && selectedValue !== "0") {
+            priceInput.value = selectedValue;
+            nameInput.value = select.options[select.selectedIndex].text;
+        }
+    }
+
+    function toggleR14ManualInput() {
+        const R14_input = document.getElementById('R14_output');
+        const isManual = document.getElementById('R14_manual_check').checked;
+        if (isManual) {
+            R14_input.removeAttribute('readonly');
+            R14_input.setAttribute('data-manual', 'true');
+        } else {
+            R14_input.setAttribute('readonly', true);
+            R14_input.setAttribute('data-manual', 'false');
+            lookupMachineData(); 
+        }
+    }
+
+    function updateConfigSelector() {
+        const A12_val = parseInt(document.getElementById('A12').value);
+        const group = document.getElementById('config_selector_group');
+        const sel = document.getElementById('config_selector');
+        sel.innerHTML = '';
+        if (alternativeConfigs[A12_val]) {
+            group.style.display = 'block';
+            const def = machineConfig[A12_val-1];
+            const alt = alternativeConfigs[A12_val];
+            sel.innerHTML = `<option value="default">默认: ${def[0]}头, ${def[1]}kW</option>
+                             <option value="alt">备选: ${alt[0]}头, ${alt[1]}kW</option>`;
+        } else { group.style.display = 'none'; }
+    }
+
+    function lookupMachineData() {
+        const A12_val = parseInt(document.getElementById('A12').value);
+        const D14_input = document.getElementById('D14');
+        const M14_power_input = document.getElementById('M14_power');
+        const R14_output_input = document.getElementById('R14_output');
+        const S14_val = getInputValue('S14'); 
+        const index = A12_val - 1; 
+
+        let heads = machineConfig[index][0], power = machineConfig[index][1];
+        if (alternativeConfigs[A12_val] && document.getElementById('config_selector').value === 'alt') {
+            heads = alternativeConfigs[A12_val][0]; power = alternativeConfigs[A12_val][1];
+        }
+
+        D14_input.value = heads;
+        M14_power_input.value = power.toFixed(3); 
+        if (!document.getElementById('R14_manual_check').checked) {
+            R14_output_input.value = heads > 0 ? (S14_val * power / heads).toFixed(4) : 0;
+        }
+    }
+
+    // 查表函数
+    function getL9(K6) { return {"PT15": 2.37, "PT10": 5.18, "PL8": 4.21, "PL4": 5.01, "PT4": 5.48, "HKV125": 6.38, "HK199": 1.42}[K6] || 0; }
+    function getL11(K6) { return {"PT15": 1, "PT10": 2, "PL8": 2, "PL4": 4, "PT4": 4, "HKV125": 6, "HK199": 1}[K6] || 0; }
+    function getL12(K6) { return {"PT15": 11, "PT10": 7, "PL8": 5, "PL4": 2.5, "PT4": 2.5, "HKV125": 1.8, "HK199": 8}[K6] || 0; }
+    function getK9(K6) { return {"PT15": 8.12, "PT10": 6.02, "PL8": 7.59, "PL4": 4.07, "PT4": 6.2, "HKV125": 3.72, "HK199": 14.42}[K6] || 0; }
+
+    function calculateMargin() {
+        lookupMachineData();
+        const R14 = getInputValue('R14_output'), B14 = getInputValue('B14'), C14 = getInputValue('C14');
+        const D14 = getInputValue('D14'), E14 = getInputValue('E14'), F12 = getInputValue('F12');
+        const I8 = getInputValue('I8'), I12 = getInputValue('I12'), J12 = getInputValue('J12');
+        const H12 = getInputValue('H12'), N12 = getInputValue('N12'), P12 = getInputValue('P12');
+        const K6 = document.getElementById('K6').value, M11 = document.getElementById('M11').value;
+
+        const K9 = getK9(K6), L9 = getL9(K6), L11 = getL11(K6), L12 = getL12(K6);
+
+        // 计算逻辑
+        const B16 = ((C14 * C14 / 4) - (B14 * B14 / 4)) * 3.14;
+        const C16 = 1 / ((B14 * B14 / 4) * 0.01 * 3.14 * 8.89 + B16 * 0.01 * 1.3);
+        const D16 = C16 * B16 * 1.3 / 100;
+        const F14 = Math.pow((B14 / 2), 2) * 3.14 * 8.89 * E14 * 60 * 24 * F12 * D14 / 1000;
+
+        if (F14 <= 0) return;
+
+        const G14 = (B14 !== 0) ? (0.03 * 0.03 * F14 / (Math.pow((B14 / 2), 2))) : 0;
+        const H14 = F14 * H12;
+        const I14 = F14 * D16 / I12 * 100 * I8 * 1.68;
+        const J14 = (F14 - F14 * D16) * J12;
+        const K14 = (L12 !== 0) ? (F14 / L12 * K9) : 0;
+        const L14 = (L12 !== 0 && L11 !== 0) ? (F14 * L9 / L12 / L11) : 0;
+        const M12 = {"華東":0.8, "華北":0.8, "華南":1.2, "船":2}[M11] || 0;
+        const O14 = (I14 + J14 + K14 + L14 + F14 * M12 + G14 * N12) * (1 + P12);
+
+        const P14 = H14 - O14;
+        const Q14 = P14 - R14 * 24 * D14 * F12;
+
+        document.getElementById('F14').innerText = F14.toFixed(8); 
+        document.getElementById('G14_output').innerText = G14.toFixed(8);
+        document.getElementById('K14_output').innerText = K14.toFixed(2);
+        document.getElementById('L14_output').innerText = L14.toFixed(2);
+        document.getElementById('O14').innerText = O14.toFixed(2);
+        document.getElementById('P14').innerText = P14.toFixed(2);
+        document.getElementById('Q14').innerText = Q14.toFixed(2);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateConfigSelector();
+        document.getElementById('S14').addEventListener('input', lookupMachineData);
+        lookupMachineData(); 
+    });
+</script>
 </body>
 </html>
